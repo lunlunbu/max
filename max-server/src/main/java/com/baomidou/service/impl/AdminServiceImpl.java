@@ -5,6 +5,7 @@ import com.baomidou.entity.Admin;
 import com.baomidou.entity.RespBean;
 import com.baomidou.mapper.AdminMapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.baomidou.service.IAdminService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,7 +46,11 @@ public class AdminServiceImpl extends ServiceImpl<AdminMapper, Admin> implements
     登录之后返回token
      */
     @Override
-    public RespBean login(String username, String password, HttpServletRequest request) {
+    public RespBean login(String username, String password, String code, HttpServletRequest request) {
+        String captcha = (String) request.getSession().getAttribute("captcha");
+        if (StringUtils.isBlank(code)||!captcha.equalsIgnoreCase(code)){
+            return RespBean.error(1004,"验证码错误",null);
+        }
         //登录
         UserDetails userDetails = userDetailsService.loadUserByUsername(username);
         if (null==userDetails||!passwordEncoder.matches(password,userDetails.getPassword())){
